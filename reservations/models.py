@@ -1,0 +1,70 @@
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+
+class User(AbstractUser):
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    is_hotel_staff = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
+    def __str__(self):
+        return self.username
+
+class Room(models.Model):
+    ROOM_TYPES = [
+        ('SINGLE', 'Single'),
+        ('DOUBLE', 'Double'),
+        ('SUITE', 'Suite'),
+    ]
+    type = models.CharField(max_length=10, choices=ROOM_TYPES)
+    number = models.CharField(max_length=10, default='Inconnu')
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField()
+    capacity = models.IntegerField()
+    amenities = models.TextField(default='[]')  # Ex: ["Wi-Fi", "TV", "AC"]
+    is_available = models.BooleanField(default=True)
+    image = models.ImageField(upload_to='room_images/', null=True, blank=True)
+
+    def __str__(self):
+        return f"Room {self.number} - {self.type}"
+
+class Reservation(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    check_in = models.DateField()
+    check_out = models.DateField()
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    is_paid = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Reservation {self.id} - {self.client.username}"
+
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    rating = models.IntegerField()
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class Promotion(models.Model):
+    code = models.CharField(max_length=20, unique=True)
+    discount = models.DecimalField(max_digits=5, decimal_places=2)
+    valid_from = models.DateField()
+    valid_to = models.DateField()
+    from django.db import models
+
+    def __str__(self):
+        return f"{self.code} - {self.discount}%"
+
+    def is_active(self):
+        """Vérifie si la promotion est actuellement valide"""
+        from django.utils.timezone import now
+        return self.valid_from <= now().date() <= self.valid_to
+
+
+        """modèle pour gérer les avis."""
+
+
+    def __str__(self):
+        return f"{self.user.email} - {self.room.name}"
+
+
