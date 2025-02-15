@@ -5,6 +5,8 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     is_hotel_staff = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+    email = models.EmailField(unique=True)
+
     def __str__(self):
         return self.username
 
@@ -15,12 +17,12 @@ class Room(models.Model):
         ('SUITE', 'Suite'),
     ]
     type = models.CharField(max_length=10, choices=ROOM_TYPES)
-    number = models.CharField(max_length=10, default='Inconnu')
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
     capacity = models.IntegerField()
     amenities = models.TextField(default='[]')  # Ex: ["Wi-Fi", "TV", "AC"]
     is_available = models.BooleanField(default=True)
+    number = models.CharField(max_length=10)
     image = models.ImageField(upload_to='room_images/', null=True, blank=True)
 
     def __str__(self):
@@ -59,12 +61,3 @@ class Promotion(models.Model):
         """Vérifie si la promotion est actuellement valide"""
         from django.utils.timezone import now
         return self.valid_from <= now().date() <= self.valid_to
-
-
-        """modèle pour gérer les avis."""
-
-
-    def __str__(self):
-        return f"{self.user.email} - {self.room.name}"
-
-

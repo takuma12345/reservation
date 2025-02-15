@@ -1,22 +1,29 @@
-from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from .models import User, Room, Reservation, Review, Promotion
-class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'phone_number', 'is_hotel_staff', 'is_admin']
+        extra_kwargs = {
+            'password': {'write_only': True},  # Empêche le mot de passe d'être affiché dans les réponses
+            'phone_number': {'required': False},  # Le champ phone_number est optionnel
+            'is_hotel_staff': {'read_only': True},  # Non modifiable par l'utilisateur
+            'is_admin': {'read_only': True},  # Non modifiable par l'utilisateur
+        }
 
-        def create(self, validated_data):
-            user = User.objects.create_user(
-                username=validated_data['username'],
-                email=validated_data['email'],
-                phone_number=validated_data.get('phone_number', ''),
-                password=validated_data['password']
-            )
-            return user
+def create(self, validated_data):
+    # Création d'un nouvel utilisateur en respectant les champs validés
+    user = User(
+        username=validated_data['username'],
+        email=validated_data['email'],
+        phone_number=validated_data.get('phone_number', None),  # Gère les champs optionnels
+    )
+    user.set_password(validated_data['password'])  # Hash du mot de passe
+    user.save()
+    return user
+
+
 
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:
@@ -44,14 +51,3 @@ class PromotionSerializer(serializers.ModelSerializer):
     def get_is_active(self, obj):
         """Retourne si la promotion est valide"""
         return obj.is_active()
-
-
-class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
-    def validate(self, data):
-        email = data.get('email')
-        password = data.get('password')
-        if email and password:
-            return data
-        raise serializers.ValidationError("Email and password are required.")
