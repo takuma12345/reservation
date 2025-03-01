@@ -59,6 +59,10 @@ MIDDLEWARE = [
 CORS_ALLOW_ALL_ORIGINS = True  # Pour permettre les requêtes depuis React
 ROOT_URLCONF = 'jd_reservation.urls'
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

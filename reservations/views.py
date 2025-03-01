@@ -3,11 +3,15 @@ from datetime import timezone
 from rest_framework import viewsets, permissions
 from .models import User, Room, Reservation, Review, Promotion
 from .serializers import UserSerializer, RoomSerializer, ReservationSerializer, ReviewSerializer, PromotionSerializer
-from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth import authenticate
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.authtoken.models import Token
+
+
 
 
 
@@ -22,9 +26,15 @@ class RoomViewSet(viewsets.ModelViewSet):
     serializer_class = RoomSerializer
     permission_classes = [permissions.IsAdminUser]  # Seul l'admin peut accéder à ces vues
 
+
+
+
 class ReservationViewSet(viewsets.ModelViewSet):
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
+    authentication_classes = [TokenAuthentication]  # Authentification par token
+    permission_classes = [IsAuthenticated]  # Nécessite un utilisateur authentifié
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
@@ -46,12 +56,6 @@ class PromotionViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-from rest_framework.permissions import AllowAny
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import User
-from .serializers import UserSerializer
 
 class RegisterView(APIView):
     """
@@ -82,11 +86,6 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-    from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authtoken.models import Token
 
 class LogoutView(APIView):
     """
@@ -107,13 +106,7 @@ class LogoutView(APIView):
 
 
 
-from rest_framework.permissions import AllowAny
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.contrib.auth import authenticate
-from rest_framework.authtoken.models import Token
-from .models import User
+
 
 class LoginView(APIView):
     """

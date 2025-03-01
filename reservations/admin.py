@@ -6,6 +6,7 @@ from .models import Room  # Importez le modèle Room
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User
+from .models import Reservation
 
 
 class RoomAdmin(admin.ModelAdmin):
@@ -43,3 +44,24 @@ class UserAdmin(BaseUserAdmin):
 
 # Enregistrer le modèle personnalisé User avec la configuration UserAdmin
 admin.site.register(User, UserAdmin)
+
+
+
+
+class ReservationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'room', 'check_in', 'check_out', 'total_price', 'is_paid', 'created_at')
+    list_filter = ('user', 'room', 'is_paid')
+    search_fields = ('user__username', 'room__name')
+
+    def get_queryset(self, request):
+        # Récupérer le queryset de base
+        qs = super().get_queryset(request)
+
+        # Si l'utilisateur est un superutilisateur, afficher toutes les réservations
+        if request.user.is_superuser:
+            return qs
+
+        # Sinon, afficher uniquement les réservations de l'utilisateur connecté
+        return qs.filter(user=request.user)
+
+admin.site.register(Reservation, ReservationAdmin)
