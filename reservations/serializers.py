@@ -1,10 +1,11 @@
 from rest_framework import serializers
 from .models import User, Room, Reservation, Review, Promotion
+from rest_framework.exceptions import ValidationError
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'phone_number', 'is_hotel_staff', 'is_admin']
+        fields = ['id', 'username', 'email', 'phone_number', 'is_hotel_staff', 'is_admin', 'password']
         extra_kwargs = {
             'password': {'write_only': True},  # Empêche le mot de passe d'être affiché dans les réponses
             'phone_number': {'required': False},  # Le champ phone_number est optionnel
@@ -31,10 +32,35 @@ class RoomSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+
+
+
 class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = '__all__'
+
+    def validate(self, data):
+        """ Vérifie la disponibilité de la chambre avant de confirmer la réservation """
+        check_in = data['check_in']
+        check_out = data['check_out']
+        room = data['room']
+
+        if check_in >= check_out:
+            raise ValidationError("La date d'arrivée doit être avant la date de départ.")
+
+        # Vérifier si la chambre est déjà réservée à ces dates
+        reservations = Reservation.objects.filter(
+            room=room,
+            check_out__gt=check_in,  # Si une réservation se termine après le check_in
+            check_in__lt=check_out   # Et commence avant le check_out
+        )
+
+        if reservations.exists():
+            raise ValidationError("Cette chambre est déjà réservée pour ces dates.")
+
+        return data
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:

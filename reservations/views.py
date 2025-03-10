@@ -1,6 +1,8 @@
 from datetime import timezone
 
 from rest_framework import viewsets, permissions
+
+from . import serializers
 from .models import User, Room, Reservation, Review, Promotion
 from .serializers import UserSerializer, RoomSerializer, ReservationSerializer, ReviewSerializer, PromotionSerializer
 from rest_framework.authentication import TokenAuthentication
@@ -10,6 +12,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework import viewsets, permissions
+from .models import Reservation
+
+
 
 
 
@@ -24,7 +30,19 @@ class UserViewSet(viewsets.ModelViewSet):
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    permission_classes = [permissions.IsAdminUser]  # Seul l'admin peut accéder à ces vues
+
+    def get_queryset(self):
+        # Filtrer les chambres disponibles si l'action est 'list' ou 'retrieve'
+        if self.action in ['list', 'retrieve']:
+            return Room.objects.filter(is_available=True)
+        return Room.objects.all()  # L'admin voit toutes les chambres
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAdminUser]
+        return [permission() for permission in permission_classes]
 
 
 
@@ -34,6 +52,30 @@ class ReservationViewSet(viewsets.ModelViewSet):
     serializer_class = ReservationSerializer
     authentication_classes = [TokenAuthentication]  # Authentification par token
     permission_classes = [IsAuthenticated]  # Nécessite un utilisateur authentifié
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_admin:  # Admin voit toutes les réservations
+            return Reservation.objects.all()
+        return Reservation.objects.filter(user=user)  # Filtre pour un utilisateur normal
+
+    def perform_create(self, serializer):
+        # Associer l'utilisateur actuel à la réservation lors de la création
+        serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        # S'assurer que l'utilisateur ne peut modifier que ses propres réservations
+        if self.request.user.is_admin or serializer.instance.user == self.request.user:
+            serializer.save()
+        else:
+            raise serializers.ValidationError("Vous ne pouvez modifier que vos propres réservations.")
+
+    def perform_destroy(self, instance):
+        # S'assurer que l'utilisateur ne peut supprimer que ses propres réservations
+        if self.request.user.is_admin or instance.user == self.request.user:
+            instance.delete()
+        else:
+            raise serializers.ValidationError("Vous ne pouvez supprimer que vos propres réservations.")
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
