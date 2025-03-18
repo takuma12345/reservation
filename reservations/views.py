@@ -3,8 +3,9 @@ from datetime import timezone
 from rest_framework import viewsets, permissions
 
 from . import serializers
-from .models import User, Room, Reservation, Review, Promotion
-from .serializers import UserSerializer, RoomSerializer, ReservationSerializer, ReviewSerializer, PromotionSerializer
+from .models import User, Room, Reservation, Review, Promotion, RoomImage
+from .serializers import UserSerializer, RoomSerializer, ReservationSerializer, ReviewSerializer, PromotionSerializer, \
+    RoomImageSerializer
 from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth import authenticate
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -45,6 +46,16 @@ class RoomViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 
+class RoomImageViewSet(viewsets.ModelViewSet):
+    queryset = RoomImage.objects.all()
+    serializer_class = RoomImageSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAdminUser]
+        return [permission() for permission in permission_classes]
 
 
 class ReservationViewSet(viewsets.ModelViewSet):

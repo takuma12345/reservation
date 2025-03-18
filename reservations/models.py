@@ -23,10 +23,24 @@ class Room(models.Model):
     amenities = models.TextField(default='[]')  # Ex: ["Wi-Fi", "TV", "AC"]
     is_available = models.BooleanField(default=True)
     number = models.CharField(max_length=10)
-    image = models.ImageField(upload_to='room_images/', null=True, blank=True)
+def __str__(self):
+    return f"Room {self.number} - {self.type}"
 
-    def __str__(self):
-        return f"Room {self.number} - {self.type}"
+def main_image(self):
+    """Retourne l'image principale si elle existe"""
+    main_img = self.images.filter(is_main=True).first()
+    return main_img.image.url if main_img else None
+
+class RoomImage(models.Model):
+     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="images")
+     image = models.ImageField(upload_to='room_images/')
+     is_main = models.BooleanField(default=False)  # True si c'est l'image principale de la chambre
+
+def __str__(self):
+        return f"Image for Room {self.room.number} ({'Main' if self.is_main else 'Secondary'})"
+
+
+
 
 class Reservation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Room, Reservation, Review, Promotion
+from .models import User, Room, Reservation, Review, Promotion, RoomImage
 from rest_framework.exceptions import ValidationError
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,12 +24,25 @@ def create(self, validated_data):
     user.save()
     return user
 
+class RoomImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RoomImage
+        fields = ['id', 'image', 'is_main']
+
 
 
 class RoomSerializer(serializers.ModelSerializer):
+    images = RoomImageSerializer(many=True, read_only=True)
+    main_image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Room
-        fields = '__all__'
+        fields = ['id', 'type', 'price', 'description', 'capacity', 'amenities', 'is_available', 'number', 'images', 'main_image_url']
+
+    def get_main_image_url(self, obj):
+        return obj.main_image()
+
+
 
 
 
