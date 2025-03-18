@@ -24,25 +24,30 @@ def create(self, validated_data):
     user.save()
     return user
 
+from rest_framework import serializers
+from .models import Room, RoomImage
+
 class RoomImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = RoomImage
-        fields = ['id', 'image', 'is_main']
-
-
+        fields = ['id', 'image', 'is_main', 'description']
 
 class RoomSerializer(serializers.ModelSerializer):
-    images = RoomImageSerializer(many=True, read_only=True)
-    main_image_url = serializers.SerializerMethodField()
+    main_image_url = serializers.SerializerMethodField()  # Champ pour l'image principale
+    images = RoomImageSerializer(many=True, read_only=True)  # Champ pour toutes les images
 
     class Meta:
         model = Room
-        fields = ['id', 'type', 'price', 'description', 'capacity', 'amenities', 'is_available', 'number', 'images', 'main_image_url']
+        fields = [
+            'id', 'type', 'price', 'description', 'capacity', 'amenities',
+            'is_available', 'number', 'main_image_url', 'images'
+        ]
 
     def get_main_image_url(self, obj):
+        """
+        Renvoie l'URL de l'image principale de la chambre.
+        """
         return obj.main_image()
-
-
 
 
 
