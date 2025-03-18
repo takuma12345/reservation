@@ -1,7 +1,5 @@
 from datetime import timezone
 
-from rest_framework import viewsets, permissions
-
 from . import serializers
 from .models import User, Room, Reservation, Review, Promotion, RoomImage
 from .serializers import UserSerializer, RoomSerializer, ReservationSerializer, ReviewSerializer, PromotionSerializer, \
@@ -14,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework import viewsets, permissions
-from .models import Reservation
+
 
 
 
@@ -34,8 +32,7 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Filtrer les chambres disponibles si l'action est 'list' ou 'retrieve'
-        if self.action in ['list', 'retrieve']:
-            return Room.objects.filter(is_available=True)
+
         return Room.objects.all()  # L'admin voit toutes les chambres
 
     def get_permissions(self):

@@ -20,16 +20,16 @@ class Room(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
     capacity = models.IntegerField()
-    amenities = models.TextField(default='[]')  # Ex: ["Wi-Fi", "TV", "AC"]
+    amenities = models.TextField(default='[]')
     is_available = models.BooleanField(default=True)
     number = models.CharField(max_length=10)
-def __str__(self):
-    return f"Room {self.number} - {self.type}"
 
-def main_image(self):
-    """Retourne l'image principale si elle existe"""
-    main_img = self.images.filter(is_main=True).first()
-    return main_img.image.url if main_img else None
+    def __str__(self):
+        return f"Room {self.number} - {self.type}"
+
+    def main_image(self):
+        main_img = self.images.filter(is_main=True).first()
+        return main_img.image.url if main_img else None
 
 class RoomImage(models.Model):
      room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="images")
