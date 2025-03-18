@@ -30,16 +30,15 @@ from rest_framework import viewsets, permissions
 from .models import Room, RoomImage
 from .serializers import RoomSerializer
 
+
 class RoomViewSet(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
 
     def get_queryset(self):
-        # Tout le monde voit toutes les chambres
         return Room.objects.all()
 
     def get_permissions(self):
-        # Seul l'admin peut créer, modifier ou supprimer des chambres
         if self.action in ['list', 'retrieve']:
             permission_classes = [permissions.AllowAny]
         else:
@@ -47,18 +46,17 @@ class RoomViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def perform_create(self, serializer):
-        """
-        Crée une chambre et associe les images si elles sont fournies.
-        """
         # Crée la chambre
         room = serializer.save()
 
         # Associe les images à la chambre (si des images sont fournies dans la requête)
         image_files = self.request.FILES.getlist('image_files')
-        for image_file in image_files:
-            RoomImage.objects.create(room=room, image=image_file)
-
-
+        for index, image_file in enumerate(image_files):
+            RoomImage.objects.create(
+                room=room,
+                image=image_file,
+                is_main=True if index == 0 else False  # Marque la première image comme principale
+            )
 
 
 class RoomImageViewSet(viewsets.ModelViewSet):
