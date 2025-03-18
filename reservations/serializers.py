@@ -30,17 +30,21 @@ from .models import Room, RoomImage
 class RoomImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = RoomImage
-        fields = ['id', 'image', 'is_main', 'description']
+        fields = ['id', 'image', 'is_main']
+
 
 class RoomSerializer(serializers.ModelSerializer):
     main_image_url = serializers.SerializerMethodField()  # Champ pour l'image principale
     images = RoomImageSerializer(many=True, read_only=True)  # Champ pour toutes les images
+    image_files = serializers.ListField(
+        child=serializers.ImageField(), write_only=True, required=False
+    )
 
     class Meta:
         model = Room
         fields = [
             'id', 'type', 'price', 'description', 'capacity', 'amenities',
-            'is_available', 'number', 'main_image_url', 'images'
+            'is_available', 'number', 'main_image_url', 'images', 'image_files'
         ]
 
     def get_main_image_url(self, obj):
@@ -48,9 +52,6 @@ class RoomSerializer(serializers.ModelSerializer):
         Renvoie l'URL de l'image principale de la chambre.
         """
         return obj.main_image()
-
-
-
 
 
 class ReservationSerializer(serializers.ModelSerializer):

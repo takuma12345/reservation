@@ -50,12 +50,13 @@ class RoomViewSet(viewsets.ModelViewSet):
         """
         Crée une chambre et associe les images si elles sont fournies.
         """
-        room = serializer.save()  # Crée la chambre
+        # Crée la chambre
+        room = serializer.save()
 
         # Associe les images à la chambre (si des images sont fournies dans la requête)
-        images_data = self.request.FILES.getlist('images')
-        for image_data in images_data:
-            RoomImage.objects.create(room=room, image=image_data)
+        image_files = self.request.FILES.getlist('image_files')
+        for image_file in image_files:
+            RoomImage.objects.create(room=room, image=image_file)
 
 
 
