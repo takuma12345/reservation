@@ -1,12 +1,16 @@
 from django.contrib import admin
 
 # Register your models here.
-from django.contrib import admin
+
 from .models import Room  # Importez le modèle Room
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User
 from .models import Reservation
+
+from django.contrib import admin
+from .models import RoomImage  # Importez le modèle RoomImage
+
 
 
 class RoomAdmin(admin.ModelAdmin):
@@ -65,3 +69,11 @@ class ReservationAdmin(admin.ModelAdmin):
         return qs.filter(user=request.user)
 
 admin.site.register(Reservation, ReservationAdmin)
+
+# Enregistrez le modèle RoomImage
+@admin.register(RoomImage)
+class RoomImageAdmin(admin.ModelAdmin):
+    list_display = ['room', 'image', 'is_main', 'description']  # Champs à afficher dans la liste
+    list_editable = ['is_main']  # Permet de modifier 'is_main' directement depuis la liste
+    list_filter = ['room', 'is_main']  # Filtres disponibles
+    search_fields = ['room__number', 'description']  # Champs de recherche
