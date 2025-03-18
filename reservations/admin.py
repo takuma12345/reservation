@@ -73,7 +73,7 @@ admin.site.register(Reservation, ReservationAdmin)
 # Enregistrez le modèle RoomImage
 @admin.register(RoomImage)
 class RoomImageAdmin(admin.ModelAdmin):
-    list_display = ['room', 'image', 'is_main', 'description']  # Champs à afficher dans la liste
+    list_display = ['room', 'image', 'is_main' ]  # Champs à afficher dans la liste
     list_editable = ['is_main']  # Permet de modifier 'is_main' directement depuis la liste
     list_filter = ['room', 'is_main']  # Filtres disponibles
-    search_fields = ['room__number', 'description']  # Champs de recherche
+    search_fields = ['room__number']  # Champs de recherche
